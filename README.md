@@ -19,3 +19,9 @@
 3. run the application
 > a `bin/` directory should be in the `go_workspace` in which you can find the binary of the application  
  to start the application, run `$ ./assnat`
+  
+The application is reachable on `localhost:3000` and exposes one endpoint: `/deputy/:<name>`  
+to try it, the following command can be ran:
+`$ curl http://localhost:3000/deputy/<name>`  
+
+if the `<name>` is part of the list, a `JSON` with all the details will be served back.
