@@ -73,7 +73,7 @@ func (setupController SetupController) UpdateLocalData(dataController *DataContr
 	fmt.Println("Checking that local data is fresh: ", deputyFileLocation)
 	if _,err := os.Stat(deputyFileLocation); os.IsNotExist(err) {
 		fmt.Println("No data file found, update required")
-		dataController.UpdateList()
+		dataController.UpdateList(setupController)
 	} else {
 		fmt.Println("Data file found, no update required")
 	}

@@ -15,9 +15,8 @@ import (
 )
 
 const DEPUTY_LIST_URL = "http://data.assemblee-nationale.fr/static/openData/repository/AMO/deputes_actifs_mandats_actifs_organes/AMO10_deputes_actifs_mandats_actifs_organes_XIV.json.zip"
-const LIST_LOCATION = "/home/flo/.assnat/deputy_list.zip"
-const LOCATION = "/home/flo/.assnat/"
-const PARSE_SCRIPT = "/home/flo/.assnat/scripts/parse.py"
+const ZIP_LIST_NAME = "deputy_list.zip"
+const PARSE_SCRIPT_NAME = "/script/parse.py"
 const DEPUTY_LIST_NAME = "list.json"
 
 type (
@@ -34,25 +33,29 @@ func (dataController DataController) GetDeputyFileName() string {
 	return DEPUTY_LIST_NAME
 }
 
-func (dataController DataController) UpdateList() {
+func (dataController DataController) UpdateList(setupController SetupController) {
 	fmt.Println("Updating deputy list")
 
-	fetchList()
-	unPackageData()
-	cleanUpDownloadArtifact()
-	parseData(dataController.session)
+	listLocation := fmt.Sprintf("%s/%s", setupController.ApplicationHomeDirectory, ZIP_LIST_NAME)
+	fetchList(listLocation)
+	unPackageData(listLocation, setupController.ApplicationHomeDirectory)
+	cleanUpDownloadArtifact(listLocation)
+
+	pathToScript := fmt.Sprintf("%s/%s", setupController.ApplicationHomeDirectory, PARSE_SCRIPT_NAME)
+	pathToList := fmt.Sprintf("%s/%s", setupController.ApplicationHomeDirectory, DEPUTY_LIST_NAME)
+	parseData(dataController.session, pathToScript, pathToList)
 }
 
-func cleanUpDownloadArtifact() {
-	err := os.Remove(LIST_LOCATION)
+func cleanUpDownloadArtifact(listLocation string) {
+	err := os.Remove(listLocation)
 	if err != nil {
 		fmt.Println("can't remove donwload artifact: ", err)
 	}
 }
 
-func fetchList() {
+func fetchList(listLocation string) {
 	fmt.Println("Fetch deputy list")
-	out, fileCreateError := os.Create(LIST_LOCATION)
+	out, fileCreateError := os.Create(listLocation)
 	defer out.Close()
 
 	if fileCreateError != nil {
@@ -72,20 +75,16 @@ func fetchList() {
 	}
 }
 
-func unPackageData() error {
+func unPackageData(listLocation string, applicationHomeDir string) error {
 	fmt.Println("Unpackaging data")
 
-	reader, err := zip.OpenReader(LIST_LOCATION)
+	reader, err := zip.OpenReader(listLocation)
 	if err != nil {
 		return err
 	}
 
-	if err := os.MkdirAll(LOCATION, 0755); err != nil {
-		return err
-	}
-
 	for _, file := range reader.File {
-		path := filepath.Join(LOCATION, "list.json") //TODO: change file name?
+		path := filepath.Join(applicationHomeDir, DEPUTY_LIST_NAME)
 		if file.FileInfo().IsDir() {
 			os.MkdirAll(path, file.Mode())
 			continue
@@ -111,9 +110,9 @@ func unPackageData() error {
 	return nil
 }
 
-func parseData(session *mgo.Session) {
+func parseData(session *mgo.Session, pathToScript string, pathToList string) {
 	fmt.Println("parsing data")
-	cmd := exec.Command("python", PARSE_SCRIPT, "members", "/home/flo/.assnat/list.json")
+	cmd := exec.Command("python", pathToScript, "members", pathToList)
 	out, err := cmd.Output()
 
 	if err != nil {
@@ -135,15 +134,17 @@ func parseData(session *mgo.Session) {
 func writeEntryToDatabase(session *mgo.Session, entry string) {
 	result := strings.Split(entry, " ")
 
-	deputy := model.Deputy{
-		Id: bson.NewObjectId(),
-		Title: result[1],
-		FirstName: result[2],
-		LastName: result[3],
-		Province: result[4],
-	}
+	if len(result) == 5 {
+		deputy := model.Deputy{
+			Id: bson.NewObjectId(),
+			Title: result[1],
+			FirstName: result[2],
+			LastName: result[3],
+			Province: result[4],
+		}
 
-	fmt.Println(deputy)
-	session.DB("ass_nat").C("deputy").Insert(deputy)
+		fmt.Println(deputy)
+		session.DB("ass_nat").C("deputy").Insert(deputy)
+	}
 }
 
