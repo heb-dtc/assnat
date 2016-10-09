@@ -50,6 +50,12 @@ func (setupController SetupController) Init() {
 			fmt.Println("Can't create script directory: ", scriptDirError)
 			panic(scriptDirError)
 		}
+		parseScriptLocation := fmt.Sprintf("%s/%s", applicationScriptDirectory, "parse.py")
+		parseCopyError := os.Rename("../AnCrawler/parse.py", parseScriptLocation)
+		if parseCopyError != nil {
+			fmt.Println("Can't deploy parse script : ", parseCopyError)
+			panic(parseCopyError)
+		}
 	}
 }
 
