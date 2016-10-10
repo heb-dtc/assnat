@@ -133,17 +133,18 @@ func parseData(session *mgo.Session, pathToScript string, pathToList string) {
 }
 func writeEntryToDatabase(session *mgo.Session, entry string) {
 	result := strings.Split(entry, ";")
-
 	if len(result) == 5 {
 		deputy := model.Deputy{
 			Id: bson.NewObjectId(),
+			AnId: result[0],
 			Title: result[1],
 			FirstName: result[2],
 			LastName: result[3],
 			Province: result[4],
 		}
-
 		fmt.Println(deputy)
 		session.DB("ass_nat").C("deputy").Insert(deputy)
+	} else {
+		fmt.Println("Entry not valid, will be skipped : ", entry)
 	}
 }
