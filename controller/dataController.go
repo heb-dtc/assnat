@@ -132,7 +132,7 @@ func parseData(session *mgo.Session, pathToScript string, pathToList string) {
 	}
 }
 func writeEntryToDatabase(session *mgo.Session, entry string) {
-	result := strings.Split(entry, " ")
+	result := strings.Split(entry, ";")
 
 	if len(result) == 5 {
 		deputy := model.Deputy{
