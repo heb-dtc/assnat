@@ -112,7 +112,7 @@ func unPackageData(listLocation string, applicationHomeDir string) error {
 
 func parseData(session *mgo.Session, pathToScript string, pathToList string) {
 	fmt.Println("parsing data")
-	cmd := exec.Command("python", pathToScript, "members", pathToList)
+	cmd := exec.Command("python3", pathToScript, "members", pathToList)
 	out, err := cmd.Output()
 
 	if err != nil {
@@ -147,4 +147,3 @@ func writeEntryToDatabase(session *mgo.Session, entry string) {
 		session.DB("ass_nat").C("deputy").Insert(deputy)
 	}
 }
-
