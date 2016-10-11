@@ -7,7 +7,7 @@
   define `GOPATH̀` environnement variable pointing to previously defined workpace  
   create a `src/` directory inside the worksapce  
   clone the project there  
-  
+
 2. install the application
 > install all the dependencies and the application
   go into the `go_workspace` and run the following commands:  
@@ -20,9 +20,7 @@
 3. run the application
 > a `bin/` directory should be in the `go_workspace` in which you can find the binary of the application  
  to start the application, run `$ ./assnat`
-  
-The application is reachable on `localhost:3000` and exposes one endpoint: `/deputy/:<name>`  
-to try it, the following command can be ran:
-`$ curl http://localhost:3000/deputy/<name>`  
 
-if the `<name>` is part of the list, a `JSON` with all the details will be served back.
+The application is reachable on `localhost:3000` and exposes those endpoints:
+ * `/deputy/:<name>` : find a deputy by name
+ * `/deputy` : list all deputees
