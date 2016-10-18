@@ -19,6 +19,7 @@ func main() {
 	deputyController := controller.NewDeputyController(session)
 
 	router.GET("/deputy/:name", deputyController.GetDeputyByName)
+	router.GET("/deputy", deputyController.GetAllDeputies)
 
 	err := http.ListenAndServe(":3000", router)
 	if err != nil {
